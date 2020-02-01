@@ -4,7 +4,7 @@ package stringpairs
 // s must contain only characters A, B, C
 func Solution(a string) string {
 	const outside = 'D'
-	var previous uint8 = outside
+	var previous byte = outside
 	input := []byte(a)
 	for i := 0; i<len(input); i++ {
 		if input[i] == previous {

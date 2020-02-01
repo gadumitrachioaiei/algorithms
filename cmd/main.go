@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/gadumitrachioaiei/algorythms/transformer"
+	"github.com/gadumitrachioaiei/algorithms/transformer"
 )
 
 func main() {

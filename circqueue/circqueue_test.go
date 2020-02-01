@@ -3,7 +3,7 @@ package circqueue_test
 import (
 	"testing"
 
-	"github.com/gadumitrachioaiei/algorythms/circqueue"
+	"github.com/gadumitrachioaiei/algorithms/circqueue"
 )
 
 func TestQueue(t *testing.T) {
