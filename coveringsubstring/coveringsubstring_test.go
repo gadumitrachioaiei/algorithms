@@ -2,11 +2,33 @@ package coveringsubstring
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
+	"unicode/utf8"
+
+	fuzz "github.com/google/gofuzz"
 )
 
+// TestSubstring tests Substring by comparing its result with the test substringTest
+// it uses random generation of utf-8 strings
 func TestSubstring(t *testing.T) {
+	f := fuzz.New()
+	var s string
+	for i := 0; i < 100; i++ {
+		f.Fuzz(&s)
+		expected := substringTest(s)
+		calculated := Substring(s)
+		if len(calculated) != len(expected) {
+			t.Fatalf("not the same length, s:\n%s\ncalculated:\n%s\nexample expected:\n%s\n", s, calculated, expected)
+		}
+		if !reflect.DeepEqual(unique(calculated), unique(expected)) {
+			t.Fatalf("not the same unique character, s:\n%s\ncalculated:\n%s\nexample expected:\n%s\n", s, calculated, expected)
+		}
+	}
+}
+
+func TestSubstringExpected(t *testing.T) {
 	tests := []struct {
 		name string
 		args string
@@ -72,6 +94,11 @@ func TestSubstring(t *testing.T) {
 			args: "0000000000000000\ufffd",
 			want: "0\ufffd",
 		},
+		{
+			name: "13",
+			args: "e腭3ʋ圔ǋ:¹鼉ĖY{{",
+			want: "e腭3ʋ圔ǋ:¹鼉ĖY{",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -110,4 +137,28 @@ func BenchmarkSubstring(b *testing.B) {
 			})
 		}
 	}
+}
+
+// substring calculates the covering substring, so as the code as more readable without carrying about performance
+// because of performance not suitable for long strings
+func substringTest(s string) string {
+	if !utf8.Valid([]byte(s)) {
+		panic("not utf8: " + s)
+	}
+	result := s
+	ssLength := len([]rune(result))
+	c := len(unique(result))
+	for i := range s {
+		var size int
+		for j := i; j < len(s); j += size {
+			_, size = utf8.DecodeRuneInString(s[j:])
+			if m := unique(s[i : j+size]); len(m) == c {
+				if l := len([]rune(s[i : j+size])); l < ssLength {
+					result = s[i : j+size]
+					ssLength = l
+				}
+			}
+		}
+	}
+	return result
 }
